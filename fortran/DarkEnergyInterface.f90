@@ -27,7 +27,7 @@
         !Type supporting w, wa or general w(z) table
         real(dl) :: w_lam = -1_dl !p/rho for the dark energy (an effective value, used e.g. for halofit)
         real(dl) :: wa = 0._dl !may not be used, just for compatibility with e.g. halofit
-        real(dl) :: beta = 1e6._dl !parameter required for beta DE parameterisation
+        real(dl) :: beta = 1.0e6_dl !parameter required for beta DE parameterisation
         real(dl) :: cs2_lam = 1_dl !rest-frame sound speed, though may not be used
         logical :: use_tabulated_w = .false.  !Use interpolated table; note this is quite slow.
         logical :: no_perturbations = .false. !Don't change this, no perturbations is unphysical
@@ -261,7 +261,7 @@
     if(.not. this%use_tabulated_w)then
         this%w_lam = Ini%Read_Double('w', -1.d0)
         this%wa = Ini%Read_Double('wa', 0.d0)
-        this%beta = Ini%Read_Double('beta', 1e6) !reading initiial value of beta param
+        this%beta = Ini%Read_Double('beta', 1.0e6.d0) !reading initiial value of beta param
         ! trap dark energy becoming important at high redshift 
         ! (will still work if this test is removed in some cases)
         if (this%w_lam + this%wa > 0) &
