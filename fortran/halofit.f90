@@ -516,7 +516,7 @@
     !!JD 08/13 generalize to variable w
 
     function omega_m(aa,om_m0,om_v0,wval,waval, beta)
-    real(dl) omega_m,omega_t,om_m0,om_v0,aa,wval,waval,Qa2
+    real(dl) omega_m,omega_t,om_m0,om_v0,aa,wval,waval,Qa2, beta
     Qa2= aa**(-1.0-3.0*(wval+waval/beta))*dexp(-3.0*(1-aa**beta)*waval/beta**2)
     omega_t=1.0+(om_m0+om_v0-1.0)/(1-om_m0-om_v0+om_v0*Qa2+om_m0/aa)
     omega_m=omega_t*om_m0/(om_m0+om_v0*aa*Qa2)
@@ -527,7 +527,7 @@
     ! evolution of omega lambda with expansion factor
 
     function omega_v(aa,om_m0,om_v0,wval,waval, beta)
-    real(dl) aa,omega_v,om_m0,om_v0,omega_t,wval,waval,Qa2
+    real(dl) aa,omega_v,om_m0,om_v0,omega_t,wval,waval,Qa2, beta
     Qa2= aa**(-1.0-3.0*(wval+waval/beta))*dexp(-3.0*(1-aa**beta)*waval/beta**2)
     omega_t=1.0+(om_m0+om_v0-1.0)/(1-om_m0-om_v0+om_v0*Qa2+om_m0/aa)
     omega_v=omega_t*om_v0*Qa2/(om_v0*Qa2+om_m0/aa)

@@ -203,12 +203,13 @@
     end function TDarkEnergyEqnOfState_w_de  ! equation of state of the PPF DE
 
 
-    subroutine TDarkEnergyEqnOfState_Effective_w_wa(this, w, wa)
+    subroutine TDarkEnergyEqnOfState_Effective_w_wa(this, w, wa, beta)
     class(TDarkEnergyEqnOfState), intent(inout) :: this
-    real(dl), intent(out) :: w, wa
+    real(dl), intent(out) :: w, wa, beta
 
     w = this%w_lam
     wa = this%wa
+    beta = this%beta
 
     end subroutine TDarkEnergyEqnOfState_Effective_w_wa
 
