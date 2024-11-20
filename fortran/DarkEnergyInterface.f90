@@ -100,12 +100,13 @@
 
     end subroutine BackgroundDensityAndPressure
 
-    subroutine Effective_w_wa(this, w, wa)
+    subroutine Effective_w_wa(this, w, wa, beta)
     class(TDarkEnergyModel), intent(inout) :: this
-    real(dl), intent(out) :: w, wa
+    real(dl), intent(out) :: w, wa, beta
 
     w = -1
     wa = 0
+    beta = 1.0e6
 
     end subroutine Effective_w_wa
 
