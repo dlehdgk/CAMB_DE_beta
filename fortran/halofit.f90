@@ -72,7 +72,7 @@
         real(dl) :: HMcode_logT_AGN=7.8_dl
         !!AM - Added these types for HMcode
         integer, private :: imead !!AM - added these for HMcode, need to be visible to all subroutines and functions
-        real(dl), private :: om_m,om_v,fnu,omm0, acur, w_hf, wa_hf
+        real(dl), private :: om_m,om_v,fnu,omm0, acur, w_hf, wa_hf, beta_hf
         real(dl), private :: om_c, om_b
     contains
     procedure :: ReadParams => THalofit_ReadParams
@@ -105,7 +105,8 @@
 
     TYPE HM_cosmology
         !Contains only things that do not need to be recalculated with each new z
-        REAL(dl) :: om_m, om_c, om_b, om_nu, om_v, w, wa, f_nu, ns, h, Tcmb, Nnu
+        REAL(dl) :: om_m, om_c, om_b, om_nu, om_v, w, wa, f_nu, ns, h, Tcmb, Nnu, beta
+        ! added beta
         REAL(dl), ALLOCATABLE :: log_r_sigma(:), log_sigma(:)
         REAL(dl), ALLOCATABLE :: a_growth(:), growth(:), agrow(:)
         REAL(dl), ALLOCATABLE :: log_k_plin(:), log_plin(:), log_plinc(:)
@@ -298,7 +299,7 @@
 
                 do itf = 1, CAMB_Pk%num_z
 
-                    call Params%DarkEnergy%Effective_w_wa(this%w_hf, this%wa_hf)
+                    call Params%DarkEnergy%Effective_w_wa(this%w_hf, this%wa_hf, this%beta_hf)
                     if (this%halofit_version == halofit_casarini) then
                         ! calculate equivalent w-constant models (w_hf,0) for w_lam+wa_ppf(1-a) models
                         ! [Casarini+ (2009,2016)].
@@ -309,8 +310,8 @@
                     ! curvature (rncur) of the power spectrum at the desired redshift, using method
                     ! described in Smith et al (2002).
                     a = 1/real(1+CAMB_Pk%Redshifts(itf),dl)
-                    this%om_m = omega_m(a, this%omm0, State%omega_de, this%w_hf, this%wa_hf)
-                    this%om_v = omega_v(a, this%omm0, State%omega_de, this%w_hf, this%wa_hf)
+                    this%om_m = omega_m(a, this%omm0, State%omega_de, this%w_hf, this%wa_hf, this%beta_hf)
+                    this%om_v = omega_v(a, this%omm0, State%omega_de, this%w_hf, this%wa_hf, this%beta_hf)
                     this%acur = a
                     xlogr1=-2.0
                     xlogr2=3.5
@@ -414,10 +415,10 @@
         !LC16 Jun: Casarini+ 2009,2016 extended constant w prediction for w(a).
         gam=0.1971-0.0843*rn+0.8460*rncur
         a=1.5222+2.8553*rn+2.3706*rn*rn+0.9903*rn*rn*rn+ &
-            0.2250*rn*rn*rn*rn-0.6038*rncur+0.1749*this%om_v*(1.+this%w_hf+this%wa_hf*(1-this%acur))
+            0.2250*rn*rn*rn*rn-0.6038*rncur+0.1749*this%om_v*(1.+this%w_hf+this%wa_hf*(1-this%acur**this%beta_hf)/this%beta_hf)
         a=10**a
         b=10**(-0.5642+0.5864*rn+0.5716*rn*rn-1.5474*rncur+ &
-            0.2279*this%om_v*(1.+this%w_hf+this%wa_hf*(1-this%acur)))
+            0.2279*this%om_v*(1.+this%w_hf+this%wa_hf*(1-this%acur**this%beta_hf)/this%beta_hf))
         c=10**(0.3698+2.0404*rn+0.8161*rn*rn+0.5869*rncur)
         xmu=0.
         xnu=10**(5.2105+3.6902*rn)
@@ -514,9 +515,9 @@
 
     !!JD 08/13 generalize to variable w
 
-    function omega_m(aa,om_m0,om_v0,wval,waval)
+    function omega_m(aa,om_m0,om_v0,wval,waval, beta)
     real(dl) omega_m,omega_t,om_m0,om_v0,aa,wval,waval,Qa2
-    Qa2= aa**(-1.0-3.0*(wval+waval))*dexp(-3.0*(1-aa)*waval)
+    Qa2= aa**(-1.0-3.0*(wval+waval/beta))*dexp(-3.0*(1-aa**beta)*waval/beta**2)
     omega_t=1.0+(om_m0+om_v0-1.0)/(1-om_m0-om_v0+om_v0*Qa2+om_m0/aa)
     omega_m=omega_t*om_m0/(om_m0+om_v0*aa*Qa2)
     end function omega_m
@@ -525,9 +526,9 @@
 
     ! evolution of omega lambda with expansion factor
 
-    function omega_v(aa,om_m0,om_v0,wval,waval)
+    function omega_v(aa,om_m0,om_v0,wval,waval, beta)
     real(dl) aa,omega_v,om_m0,om_v0,omega_t,wval,waval,Qa2
-    Qa2= aa**(-1.0-3.0*(wval+waval))*dexp(-3.0*(1-aa)*waval)
+    Qa2= aa**(-1.0-3.0*(wval+waval/beta))*dexp(-3.0*(1-aa**beta)*waval/beta**2)
     omega_t=1.0+(om_m0+om_v0-1.0)/(1-om_m0-om_v0+om_v0*Qa2+om_m0/aa)
     omega_v=omega_t*om_v0*Qa2/(om_v0*Qa2+om_m0/aa)
     end function omega_v
@@ -1046,7 +1047,7 @@
         cosm%om_b=CP%ombh2/h2
         cosm%om_nu=CP%omnuh2/h2
         cosm%om_v=State%omega_de
-        call CP%DarkEnergy%Effective_w_wa(cosm%w, cosm%wa)
+        call CP%DarkEnergy%Effective_w_wa(cosm%w, cosm%wa, cosm%beta)
         cosm%f_nu=cosm%om_nu/cosm%om_m
         cosm%h=CP%H0/100
         cosm%Tcmb=CP%tcmb
@@ -1070,6 +1071,7 @@
     IF(HM_verbose) WRITE(*,*) 'HM_cosmology: Om_v:', cosm%om_v
     IF(HM_verbose) WRITE(*,*) 'HM_cosmology: w_0:', cosm%w
     IF(HM_verbose) WRITE(*,*) 'HM_cosmology: w_a:', cosm%wa
+    IF(HM_verbose) WRITE(*,*) 'HM_cosmology: beta:', cosm%beta
     IF(HM_verbose) WRITE(*,*) 'HM_cosmology: f_nu:', cosm%f_nu
     IF(HM_verbose) WRITE(*,*) 'HM_cosmology: n_s:', cosm%ns
     IF(HM_verbose) WRITE(*,*) 'HM_cosmology: h:', cosm%h
@@ -1339,6 +1341,7 @@
         DEALLOCATE(cosm_lcdm%a_growth)
         cosm_lcdm%w=-1.
         cosm_lcdm%wa=0.
+        cosm_lcdm%beta = 1.e6
         cosm_lcdm%om_v=1.-cosm%om_m !Enforce flatness
 
         !Needs to use grow_int explicitly here for LCDM model to avoid growth HM_tables
@@ -2464,7 +2467,7 @@
     REAL(dl) :: a
 
     a=1./(1.+z)
-    X_de=(a**(-3*(1+cosm%w+cosm%wa)))*exp(-3*cosm%wa*(1-a))
+    X_de=(a**(-3*(1+cosm%w+cosm%wa/cosm%beta)))*exp(-3*cosm%wa*(1-a**cosm%beta)/cosm%beta**2)
 
     END FUNCTION X_de
 
@@ -2477,7 +2480,7 @@
     REAL(dl) :: a
 
     a=1./(1.+z)
-    w_de_hm=cosm%w+(1-a)*cosm%wa
+    w_de_hm=cosm%w+(1-a**cosm%beta)*cosm%wa/cosm%beta
 
     END FUNCTION w_de_hm
 
