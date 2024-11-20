@@ -261,7 +261,7 @@
     if(.not. this%use_tabulated_w)then
         this%w_lam = Ini%Read_Double('w', -1.d0)
         this%wa = Ini%Read_Double('wa', 0.d0)
-        this%beta = Ini%Read_Double('beta', 1.0e6.d0) !reading initiial value of beta param
+        this%beta = Ini%Read_Double('beta', 1.0e6) !reading initiial value of beta param
         ! trap dark energy becoming important at high redshift 
         ! (will still work if this test is removed in some cases)
         if (this%w_lam + this%wa > 0) &
