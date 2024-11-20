@@ -1,14 +1,16 @@
-from .baseconfig import camblib, CAMBError, CAMBValueError, CAMBUnknownArgumentError, np
-from ctypes import c_double, c_bool, POINTER, byref
 import ctypes
-from . import model, constants
-from ._config import config
-from .model import CAMBparams
-from .results import CAMBdata, MatterTransferData, ClTransferData
 import logging
-import os
 import numbers
+import os
+from ctypes import POINTER, byref, c_bool, c_double
 from inspect import getfullargspec
+
+from . import constants, model
+from ._config import config
+from .baseconfig import (CAMBError, CAMBUnknownArgumentError, CAMBValueError,
+                         camblib, np)
+from .model import CAMBparams
+from .results import CAMBdata, ClTransferData, MatterTransferData
 
 _debug_params = False
 
@@ -239,7 +241,7 @@ def set_params_cosmomc(p, num_massive_neutrinos=1, neutrino_hierarchy='degenerat
     if p.get('alpha1', 0) or p.get('Aphiphi', 1) != 1:
         raise ValueError('Parameter not currently supported by set_params_cosmomc')
 
-    pars.set_dark_energy(w=p.get('w', -1), wa=p.get('wa', 0), dark_energy_model=dark_energy_model)
+    pars.set_dark_energy(w=p.get('w', -1), wa=p.get('wa', 0), beta=p.get('beta', 1e6), dark_energy_model=dark_energy_model)
     pars.Reion.set_extra_params(deltazrei=p.get('deltazrei', None))
     pars.set_cosmology(H0=p['H0'], ombh2=p['omegabh2'], omch2=p['omegach2'], mnu=p.get('mnu', 0.06),
                        omk=p.get('omegak', 0), tau=p['tau'],
@@ -300,7 +302,9 @@ def read_ini(ini_filename, no_validate=False):
     :return: :class:`.model.CAMBparams` instance
     """
     if ini_filename.startswith('http'):
-        import requests, tempfile
+        import tempfile
+
+        import requests
         data = requests.get(ini_filename)
         ini_filename = tempfile.NamedTemporaryFile(suffix='.ini', delete=False).name
         with open(ini_filename, 'wb') as file:
