@@ -27,7 +27,7 @@
         !Type supporting w, wa or general w(z) table
         real(dl) :: w_lam = -1_dl !p/rho for the dark energy (an effective value, used e.g. for halofit)
         real(dl) :: wa = 0._dl !may not be used, just for compatibility with e.g. halofit
-        real(dl) :: beta = 1.0e6_dl !parameter required for beta DE parameterisation
+        real(dl) :: beta_DE = 1._dl !parameter required for beta DE parameterisation
         real(dl) :: cs2_lam = 1_dl !rest-frame sound speed, though may not be used
         logical :: use_tabulated_w = .false.  !Use interpolated table; note this is quite slow.
         logical :: no_perturbations = .false. !Don't change this, no perturbations is unphysical
@@ -100,13 +100,13 @@
 
     end subroutine BackgroundDensityAndPressure
 
-    subroutine Effective_w_wa(this, w, wa, beta)
+    subroutine Effective_w_wa(this, w, wa, beta_DE)
     class(TDarkEnergyModel), intent(inout) :: this
-    real(dl), intent(out) :: w, wa, beta
+    real(dl), intent(out) :: w, wa, beta_DE
 
     w = -1
     wa = 0
-    beta = 1.0e6
+    beta_DE = 1.0
 
     end subroutine Effective_w_wa
 
@@ -189,7 +189,11 @@
     real(dl), intent(IN) :: a
 
     if(.not. this%use_tabulated_w) then
-        TDarkEnergyEqnOfState_w_de= this%w_lam+ this%wa*(1._dl - a**this%beta)/this%beta ! new de eqn of state
+        if(abs(this%beta_DE)>0.001) then
+            TDarkEnergyEqnOfState_w_de= this%w_lam+ this%wa*(1._dl - a**this%beta_DE)/this%beta_DE ! new de eqn of state
+        else
+            TDarkEnergyEqnOfState_w_de = this%w_lam-this%wa*log(a)
+        endif
     else
         al=dlog(a)
         if(al <= this%equation_of_state%Xmin_interp) then
@@ -204,13 +208,13 @@
     end function TDarkEnergyEqnOfState_w_de  ! equation of state of the PPF DE
 
 
-    subroutine TDarkEnergyEqnOfState_Effective_w_wa(this, w, wa, beta)
+    subroutine TDarkEnergyEqnOfState_Effective_w_wa(this, w, wa, beta_DE)
     class(TDarkEnergyEqnOfState), intent(inout) :: this
-    real(dl), intent(out) :: w, wa, beta
+    real(dl), intent(out) :: w, wa, beta_DE
 
     w = this%w_lam
     wa = this%wa
-    beta = this%beta
+    beta_DE = this%beta_DE
 
     end subroutine TDarkEnergyEqnOfState_Effective_w_wa
 
@@ -219,9 +223,10 @@
     real(dl) :: grho_de, al, fint
     real(dl), intent(IN) :: a
 
+! need to add numerical integration for w = wa - ln(a) as it does not have an analytical solution
     if(.not. this%use_tabulated_w) then
-        grho_de = a ** (1._dl - 3. * this%w_lam - 3. * this%wa/this%beta)
-        if (this%wa/=0) grho_de=grho_de*exp(-3. * this%wa * (1._dl - a**this%beta)/this%beta**2) ! new de density evolution
+        grho_de = a ** (1._dl - 3. * this%w_lam - 3. * this%wa/this%beta_DE)
+        if (this%wa/=0) grho_de=grho_de*exp(-3. * this%wa * (1._dl - a**this%beta_DE)/this%beta_DE**2) ! new de density evolution
     else
         if(a == 0.d0)then
             grho_de = 0.d0      !assume rho_de*a^4-->0, when a-->0, OK if w_de always <0.
@@ -247,7 +252,7 @@
     class(TDarkEnergyEqnOfState) :: this
     integer, intent(in) :: FeedbackLevel
 
-    if (FeedbackLevel >0) write(*,'("(w0, wa, beta) = (", f8.5,", ", f8.5, ", ", f8.5, ")")') &
+    if (FeedbackLevel >0) write(*,'("(w0, wa, beta_DE) = (", f8.5,", ", f8.5, ", ", f8.5, ")")') &
         &   this%w_lam, this%wa
 
     end subroutine TDarkEnergyEqnOfState_PrintFeedback
@@ -263,7 +268,7 @@
     if(.not. this%use_tabulated_w)then
         this%w_lam = Ini%Read_Double('w', -1.d0)
         this%wa = Ini%Read_Double('wa', 0.d0)
-        this%beta = Ini%Read_Double('beta', 1.0d6) !reading initiial value of beta param
+        this%beta_DE = Ini%Read_Double('beta_DE', 1.d0) !reading initiial value of beta param
         ! trap dark energy becoming important at high redshift 
         ! (will still work if this test is removed in some cases)
         if (this%w_lam + this%wa > 0) &
@@ -282,8 +287,8 @@
     class(TCAMBdata), intent(in), target :: State
 
     this%is_cosmological_constant = .not. this%use_tabulated_w .and. &
-        &  abs(this%w_lam + 1._dl) < 1.e-6_dl .and. this%wa==0._dl .and. this%beta > 1.e6_dl
-        ! added condition for beta param to be considered a cosmological constant state
+        &  abs(this%w_lam + 1._dl) < 1.e-6_dl .and. this%wa==0._dl .and. this%beta_DE >= 3._dl
+        ! added condition for beta_DE param to be considered a cosmological constant state
 
     end subroutine TDarkEnergyEqnOfState_Init
 
