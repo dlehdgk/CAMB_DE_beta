@@ -223,10 +223,15 @@
     real(dl) :: grho_de, al, fint
     real(dl), intent(IN) :: a
 
-! need to add numerical integration for w = wa - ln(a) as it does not have an analytical solution
     if(.not. this%use_tabulated_w) then
-        grho_de = a ** (1._dl - 3. * this%w_lam - 3. * this%wa/this%beta_DE)
-        if (this%wa/=0) grho_de=grho_de*exp(-3. * this%wa * (1._dl - a**this%beta_DE)/this%beta_DE**2) ! new de density evolution
+        grho_de = a**(1-3*this%w_lam)
+        if(this%wa/=0) then
+            if (abs(this%beta_DE)>0.001) then
+                grho_de = grho_de * a**(-3*this%wa/this%beta_DE)*exp(-3*this%wa*(1._dl-a**this%beta_DE)/(this%beta_DE**2))
+            else
+                grho_de = grho_de * a**(1.5_dl*this%wa*log(a))
+            endif
+        endif
     else
         if(a == 0.d0)then
             grho_de = 0.d0      !assume rho_de*a^4-->0, when a-->0, OK if w_de always <0.
