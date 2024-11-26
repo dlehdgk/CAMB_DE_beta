@@ -42,7 +42,7 @@ class DarkEnergyEqnOfState(DarkEnergyModel):
     _fields_ = [
         ("w", c_double, "w(0)"),
         ("wa", c_double, "-dw/da(0)"),
-        ("beta", c_double, "parameter for $\\beta$ DE model"),
+        ("beta_DE", c_double, "parameter for $\\beta$ DE model"),
         ("cs2", c_double, "fluid rest-frame sound speed squared"),
         (
             "use_tabulated_w",
@@ -58,18 +58,18 @@ class DarkEnergyEqnOfState(DarkEnergyModel):
 
     _methods_ = [("SetWTable", [numpy_1d, numpy_1d, POINTER(c_int)])]
 
-    def set_params(self, w=-1.0, wa=0, beta=1e6, cs2=1.0):
+    def set_params(self, w=-1.0, wa=0, beta_DE=3, cs2=1.0):
         """
          Set the parameters so that P(a)/rho(a) = w(a) = w + (1-a^beta)*wa/beta
 
         :param w: w(0)
         :param wa: -dw/da(0)
-        :param beta: parameter for $\\beta$ DE model
+        :param beta_DE: parameter for $\\beta$ DE model
         :param cs2: fluid rest-frame sound speed squared
         """
         self.w = w
         self.wa = wa
-        self.beta = beta
+        self.beta_DE = beta_DE
         self.cs2 = cs2
         self.validate_params()
 
