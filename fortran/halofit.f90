@@ -2488,7 +2488,7 @@ this%halofit_version==halofit_mead2020 .OR. &
 
     a=1./(1.+z)
     X_de = a**(-3(1+cosm%w))
-    if (abs(cosm%beta_DE).ge.0.01_dl) then
+    if (abs(cosm%beta_DE).ge.0.01) then
         X_de = X_de*a**(-3*cosm%wa/cosm%beta_DE)*exp(-3*cosm%wa*(1-a**cosm%beta_DE)/cosm%beta_DE**2)
     else
         X_de = X_de*a**(1.5_dl*cosm%wa*log(a))
@@ -2504,7 +2504,7 @@ this%halofit_version==halofit_mead2020 .OR. &
     REAL(dl) :: a
 
     a=1./(1.+z)
-    if (abs(cosm%beta_DE).ge.0.01_dl) then
+    if (abs(cosm%beta_DE).ge.0.01) then
         w_de_hm = cosm%w+(1-a**cosm%beta_DE)*cosm%wa/cosm%beta_DE
     else
         w_de_hm = cosm%w-cosm%wa*log(a)

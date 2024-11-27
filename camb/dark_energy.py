@@ -58,7 +58,7 @@ class DarkEnergyEqnOfState(DarkEnergyModel):
 
     _methods_ = [("SetWTable", [numpy_1d, numpy_1d, POINTER(c_int)])]
 
-    def set_params(self, w=-1.0, wa=0, beta_DE=3, cs2=1.0):
+    def set_params(self, w=-1.0, wa=0, beta_DE=1, cs2=1.0):
         """
          Set the parameters so that P(a)/rho(a) = w(a) = w + (1-a^beta)*wa/beta
 

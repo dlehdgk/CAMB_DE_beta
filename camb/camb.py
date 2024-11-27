@@ -269,7 +269,7 @@ def set_params_cosmomc(
     pars.set_dark_energy(
         w=p.get("w", -1),
         wa=p.get("wa", 0),
-        beta_DE=p.get("beta_DE", 3),
+        beta_DE=p.get("beta_DE", 1),
         dark_energy_model=dark_energy_model,
     )
     pars.Reion.set_extra_params(deltazrei=p.get("deltazrei", None))

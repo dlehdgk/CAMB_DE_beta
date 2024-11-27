@@ -6,11 +6,22 @@ from typing import Optional, Union
 from . import bbn, constants
 from . import recombination as recomb
 from . import reionization as reion
-from .baseconfig import (AllocatableArrayDouble, AllocatableArrayInt,
-                         AllocatableObject, AllocatableObjectArray,
-                         CAMB_Structure, CAMBError, CAMBParamRangeError,
-                         CAMBValueError, F2003Class, camblib, fortran_class,
-                         np, numpy_1d, numpy_1d_int)
+from .baseconfig import (
+    AllocatableArrayDouble,
+    AllocatableArrayInt,
+    AllocatableObject,
+    AllocatableObjectArray,
+    CAMB_Structure,
+    CAMBError,
+    CAMBParamRangeError,
+    CAMBValueError,
+    F2003Class,
+    camblib,
+    fortran_class,
+    np,
+    numpy_1d,
+    numpy_1d_int,
+)
 from .dark_energy import DarkEnergyEqnOfState, DarkEnergyModel
 from .initialpower import InitialPower, SplinedInitialPower
 from .nonlinear import NonLinearModel
@@ -907,7 +918,7 @@ class CAMBparams(F2003Class):
             self.Reion = self.make_class_named(reionization_model, ReionizationModel)
 
     def set_dark_energy(
-        self, w=-1.0, cs2=1.0, wa=0, beta_DE=3, dark_energy_model="fluid"
+        self, w=-1.0, cs2=1.0, wa=0, beta_DE=1, dark_energy_model="fluid"
     ):
         r"""
         Set dark energy parameters (use set_dark_energy_w_a to set w(a) from numerical table instead)

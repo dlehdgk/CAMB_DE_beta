@@ -292,7 +292,7 @@
     class(TCAMBdata), intent(in), target :: State
 
     this%is_cosmological_constant = .not. this%use_tabulated_w .and. &
-        &  abs(this%w_lam + 1._dl) < 1.e-6_dl .and. this%wa==0._dl .and. this%beta_DE >= 1.e6_dl
+        &  abs(this%w_lam + 1._dl) < 1.e-6_dl .and. this%wa==0._dl .or. this%beta_DE.ge.1.e6_dl
         ! added condition for beta_DE param to be considered a cosmological constant state
 
     end subroutine TDarkEnergyEqnOfState_Init
