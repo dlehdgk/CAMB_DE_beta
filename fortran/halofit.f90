@@ -224,7 +224,7 @@
     REAL(dl), PARAMETER :: alpha_neff_integration=2. ! Exponent to speed up integration
     INTEGER, PARAMETER :: iorder_neff_integration=3  ! Polynomial order for numerical integration
 
-    ! HMcode numerical parameters for cold transfer function approximation
+! HMcode numerical parameters for cold transfer function approximation
     ! AM: Sep 20: Care here, before EdS_Tcold_growth=.TRUE.
     LOGICAL, PARAMETER :: EdS_Tcold_growth=.FALSE. ! Should the EdS growth function (incorrectly) be used?
 
@@ -285,7 +285,7 @@
             IF(this%halofit_version==halofit_mead2016 .OR. &
                 this%halofit_version==halofit_halomodel .OR. &
                 this%halofit_version==halofit_mead2015 .OR. &
-                this%halofit_version==halofit_mead2020 .OR. &
+this%halofit_version==halofit_mead2020 .OR. &
                 this%halofit_version==halofit_mead2020_feedback) THEN
                 CALL this%HMcode(State,CAMB_Pk)
             ELSE
@@ -414,11 +414,17 @@
         !cosmological models with constant w.
         !LC16 Jun: Casarini+ 2009,2016 extended constant w prediction for w(a).
         gam=0.1971-0.0843*rn+0.8460*rncur
-        a=1.5222+2.8553*rn+2.3706*rn*rn+0.9903*rn*rn*rn+ &
-            0.2250*rn*rn*rn*rn-0.6038*rncur+0.1749*this%om_v*(1.+this%w_hf+this%wa_hf*(1-this%acur**this%beta_DE_hf)/this%beta_DE_hf)
+        a=1.5222+2.8553*rn+2.3706*rn*rn+0.9903*rn*rn*rn+ 0.2250*rn*rn*rn*rn-0.6038*rncur+0.1749*this%om_v
+        !adding if condition to avoid divergence at small beta
+        if(abs(this%beta_DE_hf).ge.0.01_dl) then
+            a = a*(1.+this%w_hf+this%wa_hf*(1-this%acur**this%beta_DE_hf)/this%beta_DE_hf)
+            b=10**(-0.5642+0.5864*rn+0.5716*rn*rn-1.5474*rncur+ &
+                0.2279*this%om_v*(1.+this%w_hf+this%wa_hf*(1-this%acur**this%beta_DE_hf)/this%beta_DE_hf))
+        else
+            a = a*(1.+this%w_hf-this%wa_hf*log(this%acur))
+            b=10**(-0.5642+0.5864*rn+0.5716*rn*rn-1.5474*rncur+ &
+                0.2279*this%om_v*(1.+this%w_hf-this%wa_hf*log(this%acur)))
         a=10**a
-        b=10**(-0.5642+0.5864*rn+0.5716*rn*rn-1.5474*rncur+ &
-            0.2279*this%om_v*(1.+this%w_hf+this%wa_hf*(1-this%acur**this%beta_DE_hf)/this%beta_DE_hf))
         c=10**(0.3698+2.0404*rn+0.8161*rn*rn+0.5869*rncur)
         xmu=0.
         xnu=10**(5.2105+3.6902*rn)
@@ -517,7 +523,14 @@
 
     function omega_m(aa,om_m0,om_v0,wval,waval, beta_DE)
     real(dl) omega_m,omega_t,om_m0,om_v0,aa,wval,waval,Qa2, beta_DE
-    Qa2= aa**(-1.0-3.0*(wval+waval/beta_DE))*dexp(-3.0*(1-aa**beta_DE)*waval/beta_DE**2)
+    Qa2 = aa**(-1-3*wval)
+    if(waval/=0) then
+        if (abs(beta_DE).ge.0.01_dl) then
+            Qa2 = Qa2 * aa**(-3*waval/beta_DE)*exp(-3*waval*(1._dl-aa**beta_DE)/(beta_DE**2))
+        else
+            Qa2 = Qa2 * aa**(1.5_dl*waval*log(aa))
+        endif
+    endif
     omega_t=1.0+(om_m0+om_v0-1.0)/(1-om_m0-om_v0+om_v0*Qa2+om_m0/aa)
     omega_m=omega_t*om_m0/(om_m0+om_v0*aa*Qa2)
     end function omega_m
@@ -528,7 +541,14 @@
 
     function omega_v(aa,om_m0,om_v0,wval,waval, beta_DE)
     real(dl) aa,omega_v,om_m0,om_v0,omega_t,wval,waval,Qa2, beta_DE
-    Qa2= aa**(-1.0-3.0*(wval+waval/beta_DE))*dexp(-3.0*(1-aa**beta_DE)*waval/beta_DE**2)
+    Qa2 = aa**(-1-3*wval)
+    if(waval/=0) then
+        if (abs(beta_DE).ge.0.01_dl) then
+            Qa2 = Qa2 * aa**(-3*waval/beta_DE)*exp(-3*waval*(1._dl-aa**beta_DE)/(beta_DE**2))
+        else
+            Qa2 = Qa2 * aa**(1.5_dl*waval*log(aa))
+        endif
+    endif
     omega_t=1.0+(om_m0+om_v0-1.0)/(1-om_m0-om_v0+om_v0*Qa2+om_m0/aa)
     omega_v=omega_t*om_v0*Qa2/(om_v0*Qa2+om_m0/aa)
     end function omega_v
@@ -1341,7 +1361,7 @@
         DEALLOCATE(cosm_lcdm%a_growth)
         cosm_lcdm%w=-1.
         cosm_lcdm%wa=0.
-        cosm_lcdm%beta_DE = 3.
+        cosm_lcdm%beta_DE = 1.e6_dl
         cosm_lcdm%om_v=1.-cosm%om_m !Enforce flatness
 
         !Needs to use grow_int explicitly here for LCDM model to avoid growth HM_tables
@@ -2467,8 +2487,12 @@
     REAL(dl) :: a
 
     a=1./(1.+z)
-    X_de=(a**(-3*(1+cosm%w+cosm%wa/cosm%beta_DE)))*exp(-3*cosm%wa*(1-a**cosm%beta_DE)/cosm%beta_DE**2)
-
+    X_de = a**(-3(1+cosm%w))
+    if (abs(cosm%beta_DE).ge.0.01_dl) then
+        X_de = X_de*a**(-3*cosm%wa/cosm%beta_DE)*exp(-3*cosm%wa*(1-a**cosm%beta_DE)/cosm%beta_DE**2)
+    else
+        X_de = X_de*a**(1.5_dl*cosm%wa*log(a))
+    endif
     END FUNCTION X_de
 
     FUNCTION w_de_hm(z,cosm)
@@ -2480,8 +2504,11 @@
     REAL(dl) :: a
 
     a=1./(1.+z)
-    w_de_hm=cosm%w+(1-a**cosm%beta_DE)*cosm%wa/cosm%beta_DE
-
+    if (abs(cosm%beta_DE).ge.0.01_dl) then
+        w_de_hm = cosm%w+(1-a**cosm%beta_DE)*cosm%wa/cosm%beta_DE
+    else
+        w_de_hm = cosm%w-cosm%wa*log(a)
+    endif
     END FUNCTION w_de_hm
 
     FUNCTION Omega_m_hm(z,cosm)
