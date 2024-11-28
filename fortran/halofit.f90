@@ -424,6 +424,7 @@ this%halofit_version==halofit_mead2020 .OR. &
             a = a*(1.+this%w_hf-this%wa_hf*log(this%acur))
             b=10**(-0.5642+0.5864*rn+0.5716*rn*rn-1.5474*rncur+ &
                 0.2279*this%om_v*(1.+this%w_hf-this%wa_hf*log(this%acur)))
+        endif
         a=10**a
         c=10**(0.3698+2.0404*rn+0.8161*rn*rn+0.5869*rncur)
         xmu=0.
