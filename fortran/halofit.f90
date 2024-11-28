@@ -416,7 +416,7 @@ this%halofit_version==halofit_mead2020 .OR. &
         gam=0.1971-0.0843*rn+0.8460*rncur
         a=1.5222+2.8553*rn+2.3706*rn*rn+0.9903*rn*rn*rn+ 0.2250*rn*rn*rn*rn-0.6038*rncur+0.1749*this%om_v
         !adding if condition to avoid divergence at small beta
-        if(abs(this%beta_DE_hf).ge.0.01_dl) then
+        if(abs(this%beta_DE_hf).ge.0.001_dl) then
             a = a*(1.+this%w_hf+this%wa_hf*(1-this%acur**this%beta_DE_hf)/this%beta_DE_hf)
             b=10**(-0.5642+0.5864*rn+0.5716*rn*rn-1.5474*rncur+ &
                 0.2279*this%om_v*(1.+this%w_hf+this%wa_hf*(1-this%acur**this%beta_DE_hf)/this%beta_DE_hf))
@@ -525,7 +525,7 @@ this%halofit_version==halofit_mead2020 .OR. &
     real(dl) omega_m,omega_t,om_m0,om_v0,aa,wval,waval,Qa2, beta_DE
     Qa2 = aa**(-1-3*wval)
     if(waval/=0) then
-        if (abs(beta_DE).ge.0.01_dl) then
+        if (abs(beta_DE).ge.0.001_dl) then
             Qa2 = Qa2 * aa**(-3*waval/beta_DE)*exp(-3*waval*(1._dl-aa**beta_DE)/(beta_DE**2))
         else
             Qa2 = Qa2 * aa**(1.5_dl*waval*log(aa))
@@ -543,7 +543,7 @@ this%halofit_version==halofit_mead2020 .OR. &
     real(dl) aa,omega_v,om_m0,om_v0,omega_t,wval,waval,Qa2, beta_DE
     Qa2 = aa**(-1-3*wval)
     if(waval/=0) then
-        if (abs(beta_DE).ge.0.01_dl) then
+        if (abs(beta_DE).ge.0.001_dl) then
             Qa2 = Qa2 * aa**(-3*waval/beta_DE)*exp(-3*waval*(1._dl-aa**beta_DE)/(beta_DE**2))
         else
             Qa2 = Qa2 * aa**(1.5_dl*waval*log(aa))
@@ -2488,7 +2488,7 @@ this%halofit_version==halofit_mead2020 .OR. &
 
     a=1./(1.+z)
     X_de = a**(-3(1+cosm%w))
-    if (abs(cosm%beta_DE).ge.0.01) then
+    if (abs(cosm%beta_DE).ge.0.001) then
         X_de = X_de*a**(-3*cosm%wa/cosm%beta_DE)*exp(-3*cosm%wa*(1-a**cosm%beta_DE)/cosm%beta_DE**2)
     else
         X_de = X_de*a**(1.5_dl*cosm%wa*log(a))
@@ -2504,7 +2504,7 @@ this%halofit_version==halofit_mead2020 .OR. &
     REAL(dl) :: a
 
     a=1./(1.+z)
-    if (abs(cosm%beta_DE).ge.0.01) then
+    if (abs(cosm%beta_DE).ge.0.001) then
         w_de_hm = cosm%w+(1-a**cosm%beta_DE)*cosm%wa/cosm%beta_DE
     else
         w_de_hm = cosm%w-cosm%wa*log(a)

@@ -189,7 +189,7 @@
     real(dl), intent(IN) :: a
 
     if(.not. this%use_tabulated_w) then
-        if(abs(this%beta_DE).ge.0.01_dl) then
+        if(abs(this%beta_DE).ge.0.001_dl) then
             TDarkEnergyEqnOfState_w_de= this%w_lam+ this%wa*(1._dl - a**this%beta_DE)/this%beta_DE ! new de eqn of state
         else
             TDarkEnergyEqnOfState_w_de = this%w_lam-this%wa*log(a)
@@ -226,7 +226,7 @@
     if(.not. this%use_tabulated_w) then
         grho_de = a**(1-3*this%w_lam)
         if(this%wa/=0) then
-            if (abs(this%beta_DE).ge.0.01_dl) then
+            if (abs(this%beta_DE).ge.0.001_dl) then
                 grho_de = grho_de * a**(-3*this%wa/this%beta_DE)*exp(-3*this%wa*(1._dl-a**this%beta_DE)/(this%beta_DE**2))
             else
                 grho_de = grho_de * a**(1.5_dl*this%wa*log(a))
