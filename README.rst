@@ -39,6 +39,12 @@ Then install using::
 
     pip install -e ./CAMB [--user]
 
+May need to clean the installation using::
+    
+    python setup.py clean
+
+before re-installing if you have previously installed a different version.
+
 You will need gfortran 6 or higher installed to compile (usually included with gcc by default).
 If you have gfortran installed, "python setup.py make" (and other standard setup commands) will build the Fortran
 library on all systems (including Windows without directly using a Makefile).
