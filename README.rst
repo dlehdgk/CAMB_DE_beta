@@ -26,19 +26,17 @@ and background evolution. The code is in Python, with numerical code implemented
 See the `CAMB python example notebook <https://camb.readthedocs.io/en/latest/CAMBdemo.html>`_ for a
 quick introduction to how to use the CAMB Python package.
 
-For a standard non-editable installation use::
+This is a modification of the original CAMB code by Dong Ha Lee for a more general parameterisation of dark energy equation of state.
 
-    pip install camb [--user]
+To install, first clone the repository::
 
-The --user is optional and only required if you don't have write permission to your main python installation.
-To install from source, clone from github using::
+    git clone --recursive https://github.com/dlehdgk/CAMB_DE_beta.git
 
-    git clone --recursive https://github.com/cmbant/CAMB
+Then install an editable version of the python wrapper using::
 
-Then install using::
+    pip install -e .
 
-    pip install -e ./CAMB [--user]
-
+In the source directory.
 May need to clean the installation using::
     
     python setup.py clean
@@ -58,22 +56,6 @@ After installation you can also run CAMB from the command line reading parameter
 To compile the Fortran command-line code run "make camb" in the fortran directory. For full details
 see the  `ReadMe <https://camb.info/readme.html>`_.
 
-Branches
-=============================
-
-The master branch contains latest changes to the main release version.
-
-There is a test suite, which runs automatically on GitHub actions for new commits and pull requests.
-Reference results and test outputs are stored in the `test outputs repository <https://github.com/cmbant/CAMB_test_outputs/>`_. Tests can also be run locally.
-
-To reproduce legacy results, see these branches:
-
- - *CAMB_sources* is the old public `CAMB Sources <https://camb.info/sources/>`_ code.
- - *CAMB_v0* is the old Fortran-oriented (gfortran 4.8-compatible) version as used by the Planck 2018 analysis.
- - *rayleigh* includes frequency-dependent Rayleigh scattering
- - *python2* is the last Python 2 compatible version
-
-===================
 
 .. raw:: html
 
