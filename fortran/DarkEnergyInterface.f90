@@ -209,6 +209,7 @@
 
 
     subroutine TDarkEnergyEqnOfState_Effective_w_wa(this, w, wa, beta_DE)
+    ! this is causing problems with halofit.
     class(TDarkEnergyEqnOfState), intent(inout) :: this
     real(dl), intent(out) :: w, wa, beta_DE
 
