@@ -210,11 +210,10 @@
 
     subroutine TDarkEnergyEqnOfState_Effective_w_wa(this, w, wa)
     class(TDarkEnergyEqnOfState), intent(inout) :: this
-    real(dl), intent(out) :: w, wa, beta_DE
+    real(dl), intent(out) :: w, wa
 
     w = this%w_lam
     wa = this%wa
-    beta_DE = this%beta_DE
 
     end subroutine TDarkEnergyEqnOfState_Effective_w_wa
 
