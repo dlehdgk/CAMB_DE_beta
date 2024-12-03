@@ -42,6 +42,9 @@ May need to clean the installation using::
     python setup.py clean
 
 before re-installing if you have previously installed a different version.
+If installing as part of [COBAYA](https://cobaya.readthedocs.io/en/latest/) to use a modified version of CAMB without creating a new environment each time, you can use::
+
+    python setup.py build
 
 You will need gfortran 6 or higher installed to compile (usually included with gcc by default).
 If you have gfortran installed, "python setup.py make" (and other standard setup commands) will build the Fortran
