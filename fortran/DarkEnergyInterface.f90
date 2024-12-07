@@ -27,7 +27,7 @@
         !Type supporting w, wa or general w(z) table
         real(dl) :: w_lam = -1_dl !p/rho for the dark energy (an effective value, used e.g. for halofit)
         real(dl) :: wa = 0._dl !may not be used, just for compatibility with e.g. halofit
-        real(dl) :: beta_DE = 1._dl !parameter required for beta DE parameterisation
+        real(dl) :: beta_DE = 1_dl !parameter required for beta DE parameterisation
         real(dl) :: cs2_lam = 1_dl !rest-frame sound speed, though may not be used
         logical :: use_tabulated_w = .false.  !Use interpolated table; note this is quite slow.
         logical :: no_perturbations = .false. !Don't change this, no perturbations is unphysical
@@ -100,13 +100,12 @@
 
     end subroutine BackgroundDensityAndPressure
 
-    subroutine Effective_w_wa(this, w, wa, beta_DE)
+    subroutine Effective_w_wa(this, w, wa)
     class(TDarkEnergyModel), intent(inout) :: this
-    real(dl), intent(out) :: w, wa, beta_DE
+    real(dl), intent(out) :: w, wa
 
     w = -1
     wa = 0
-    beta_DE = 1.0
 
     end subroutine Effective_w_wa
 
@@ -208,14 +207,13 @@
     end function TDarkEnergyEqnOfState_w_de  ! equation of state of the PPF DE
 
 
-    subroutine TDarkEnergyEqnOfState_Effective_w_wa(this, w, wa, beta_DE)
+    subroutine TDarkEnergyEqnOfState_Effective_w_wa(this, w, wa)
     ! this is causing problems with halofit.
     class(TDarkEnergyEqnOfState), intent(inout) :: this
-    real(dl), intent(out) :: w, wa, beta_DE
+    real(dl), intent(out) :: w, wa
 
     w = this%w_lam
     wa = this%wa
-    beta_DE = this%beta_DE
 
     end subroutine TDarkEnergyEqnOfState_Effective_w_wa
 
@@ -228,7 +226,7 @@
         grho_de = a**(1-3*this%w_lam)
         if(this%wa/=0) then
             if (abs(this%beta_DE).ge.0.001_dl) then
-                grho_de = grho_de * a**(-3*this%wa/this%beta_DE)*exp(-3*this%wa*(1._dl-a**this%beta_DE)/(this%beta_DE**2))
+                grho_de = grho_de * a**(-3*this%wa/this%beta_DE)*exp(-3*this%wa*(1_dl-a**this%beta_DE)/(this%beta_DE**2))
             else
                 grho_de = grho_de * a**(1.5_dl*this%wa*log(a))
             endif
@@ -293,7 +291,7 @@
     class(TCAMBdata), intent(in), target :: State
 
     this%is_cosmological_constant = .not. this%use_tabulated_w .and. &
-        &  abs(this%w_lam + 1._dl) < 1.e-6_dl .and. this%wa==0._dl .or. this%beta_DE.ge.1.e6_dl
+        &  abs(this%w_lam + 1._dl) < 1.e-6_dl .and. this%wa==0._dl
         ! added condition for beta_DE param to be considered a cosmological constant state
 
     end subroutine TDarkEnergyEqnOfState_Init
